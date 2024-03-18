@@ -14,8 +14,7 @@ namespace JoyFul.API.Models
         public string  Email  { get; set; }
         [MaxLength(100)]
         public string  PhoneNumber   { get; set; }
-        [MaxLength(100)]
-        public string  Subject  { get; set; }
+        public  Subject Subject { get; set; }    
         public string  Message  { get; set; }
         public DateTime  CreatedAt  { get; set; } = DateTime.Now;
     }

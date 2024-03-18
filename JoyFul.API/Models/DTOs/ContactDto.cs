@@ -16,8 +16,8 @@ namespace JoyFul.API.Models.DTOs
         [MaxLength(100)]
         public string? PhoneNumber { get; set; }
 
-        [Required, MaxLength(100)]
-        public string Subject { get; set; }
+
+        public int SubjectId { get; set; }
 
         public string Message { get; set; }
     }
