@@ -3,6 +3,7 @@ using JoyFul.API.Models;
 using JoyFul.API.Models.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace JoyFul.API.Controllers
 {
@@ -12,18 +13,61 @@ namespace JoyFul.API.Controllers
     {
         private readonly ApplicationDbContext _context;
 
+      
         public ContactsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
+        [HttpGet("subjects")]
+
+        public IActionResult GetSubjects()
+        {
+            var  listSubjects = _context.Subjects.ToList();
+            return Ok(listSubjects);
+        }
+
         [HttpGet]
 
-        public IActionResult GetContacts()
+        public IActionResult GetContacts(int? page)
         {
-            //read contacts from databse
-            var contacts =  _context.Contacts.ToList();
-            return Ok(contacts);
+
+            //Add Pagination
+            if (page == null || page<1)
+            {
+                page = 1;
+            }
+            int pageSize = 5;
+            int totalPages = 0;
+
+            decimal count = _context.Contacts.Count();
+            totalPages = (int)Math.Ceiling(count / pageSize);
+
+            var contacts = _context.Contacts
+                .Include(c=>c.Subject)
+                .OrderByDescending(c=>c.Id)
+                .Skip((int)(page-1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var response = new
+            {
+                Contacts = contacts,
+                TotalPages = totalPages,
+                PageSize = pageSize,
+                Page = page
+            };
+
+            return Ok(response);
+
+
+
+            //read contacts from databse 
+            //We have to Include the navigation property we want to use,
+            //so in the parenthesis, we have to provide an arrow function, so for every contact,
+            //let's call it c and we want to include contact. subject
+            //var contacts =  _context.Contacts.Include(c=> c.Subject).ToList();
+            //return Ok(contacts);
         }
 
         [HttpGet("{id}")]
@@ -32,7 +76,7 @@ namespace JoyFul.API.Controllers
         {
             //read contacts from database
 
-            var contact = _context.Contacts.FirstOrDefault(x => x.Id == id);
+            var contact = _context.Contacts.Include(c=>c.Subject).FirstOrDefault(x => x.Id == id);
 
             if (contact == null)
             {
@@ -45,15 +89,23 @@ namespace JoyFul.API.Controllers
 
         public IActionResult CreateContact(ContactDto contactDto)
         {
-            //Convert  contactDto into a Contact object that we can add to the database
+            var subject = _context.Subjects.Find(contactDto.SubjectId);
 
+            //Check that the subjects that we are received belongs to the authorized list of subjects
+            if (subject == null)
+            {
+                ModelState.AddModelError("Subject", "Please select a valid subject");
+                return BadRequest(ModelState);
+            }
+
+            //Convert  contactDto into a Contact object that we can add to the database
             Contact contact = new Contact()
             {
                 FirstName = contactDto.FirstName,
                 LastName = contactDto.LastName,
                 Email = contactDto.Email,
                 PhoneNumber = contactDto.PhoneNumber ?? "",
-                Subject = contactDto.Subject,
+                Subject = subject,
                 Message = contactDto.Message,
                 CreatedAt = DateTime.Now,
             };
@@ -72,8 +124,18 @@ namespace JoyFul.API.Controllers
 
         public IActionResult UpdateContact(int id, ContactDto contactDto)
         {
+            var subject = _context.Subjects.Find(contactDto.SubjectId);
+
+            // Check that the subjects that we are received belongs to the authorized list of subjects
+            if (subject == null)
+            {
+                ModelState.AddModelError("Subject", "Please select a valid subject");
+                return BadRequest(ModelState);
+            }
+
+
             //check  if the ID is valid
-             var contact = _context.Contacts.FirstOrDefault(x=> x.Id==id);
+            var contact = _context.Contacts.FirstOrDefault(x=> x.Id==id);
             if (contact == null)
             {
                 return NotFound();
@@ -83,7 +145,7 @@ namespace JoyFul.API.Controllers
             contact.LastName = contactDto.LastName;
             contact.Email = contactDto.Email;
             contact.PhoneNumber = contactDto.PhoneNumber ?? "";
-            contact.Subject = contactDto.Subject;
+            contact.Subject = subject;
             contact.Message = contactDto.Message;
             contact.CreatedAt = DateTime.Now;
 
