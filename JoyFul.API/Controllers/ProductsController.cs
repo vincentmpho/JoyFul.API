@@ -20,9 +20,10 @@ namespace JoyFul.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllProducts(string serach, string category,
-            int minPrice, int maxPrice,
-            String sort, string order)
+        public IActionResult GetAllProducts(string? serach, string? category,
+            int? minPrice, int? maxPrice,
+            string? sort, string? order
+            )
         {
             //serch Functionality
             IQueryable<Product>query = _context.Products;
@@ -47,9 +48,6 @@ namespace JoyFul.API.Controllers
             {
                 query = query.Where(p=>p.Price<=minPrice);
             }
-
-            //List of product
-            var products = query.ToList();
 
             //Add the serch criteria
 
@@ -129,12 +127,29 @@ namespace JoyFul.API.Controllers
                 }
             }
 
+            //Pagination Functionality
+            //if (page == null || page < 1) page = 1;
+
+            //int pageSize = 5;
+            //int totalPages = 0;
+
+            ////find the toal number of prudcts
+            //decimal count = query.Count();
+
+            ////find the total of pages
+            //totalPages =(int)Math.Ceiling(count/pageSize);
+            //query = query.Skip((int)page-1 * pageSize).Take(pageSize);
+
+            //List of product
+            var products = query.ToList();
+
+           
 
             if (products == null)
             {
                 return NotFound();
             }
-
+            
             return Ok(products);
         }
 
