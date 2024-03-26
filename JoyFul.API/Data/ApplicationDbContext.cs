@@ -12,5 +12,7 @@ namespace JoyFul.API.Data
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Subject> Subjects { get; set; }
+
+        public DbSet<User> Users { get; set; }
     }
 }
