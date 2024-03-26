@@ -1,6 +1,7 @@
 ﻿using JoyFul.API.Data;
 using JoyFul.API.Models;
 using JoyFul.API.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -135,6 +136,14 @@ namespace JoyFul.API.Controllers
 
             // Return HTTP OK response with the response object
             return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("AuthorizeAuthenticatedUsers")]
+
+        public IActionResult AuthorizeAuthenticatedUsers()
+        {
+            return Ok("You are Authorized");
         }
 
 
