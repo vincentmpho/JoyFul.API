@@ -25,6 +25,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+//enable static files
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 
