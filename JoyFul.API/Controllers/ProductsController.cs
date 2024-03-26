@@ -133,6 +133,28 @@ namespace JoyFul.API.Controllers
             return Ok(product);
         }
 
+        [HttpDelete("{id}")]
 
+        public IActionResult DeleteProduct(int id)
+        {
+            var product = _context.Products.FirstOrDefault(x => x.Id == id);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            //Delete the image on the server
+            string imagesFolder = _env.WebRootPath + "images/products/";
+            System.IO.File.Delete(imagesFolder + product.ImageFileName);
+
+            //Delete product from databse
+            _context.Products.Remove(product);
+
+            //save
+            _context.SaveChanges();
+
+            return Ok();
+        }
     }
 }
