@@ -21,7 +21,8 @@ namespace JoyFul.API.Controllers
 
         [HttpGet]
         public IActionResult GetAllProducts(string serach, string category,
-            int minPrice, int maxPrice)
+            int minPrice, int maxPrice,
+            String sort, string order)
         {
             //serch Functionality
             IQueryable<Product>query = _context.Products;
@@ -51,6 +52,82 @@ namespace JoyFul.API.Controllers
             var products = query.ToList();
 
             //Add the serch criteria
+
+            //Sort Functionality
+            if(sort == null)sort = "id";
+            if (order == null || order != "asc") order = "desc";
+
+            if (sort.ToLower() == "name")
+            {
+                if(order == "asc")
+                {
+                    query = query.OrderBy(p=>p.Name);
+                }
+                else
+                {
+                    query = query.OrderByDescending(p=>p.Name);
+                }
+            }
+
+           else if (sort.ToLower() == "brand")
+            {
+                if (order == "asc")
+                {
+                    query = query.OrderBy(p => p.Brand);
+                }
+                else
+                {
+                    query = query.OrderByDescending(p => p.Brand);
+                }
+            }
+
+
+            else if (sort.ToLower() == "category")
+            {
+                if (order == "asc")
+                {
+                    query = query.OrderBy(p => p.Category);
+                }
+                else
+                {
+                    query = query.OrderByDescending(p => p.Category);
+                }
+            }
+
+            else if (sort.ToLower() == "price")
+            {
+                if (order == "asc")
+                {
+                    query = query.OrderBy(p => p.Price);
+                }
+                else
+                {
+                    query = query.OrderByDescending(p => p.Price);
+                }
+            }
+
+            else if (sort.ToLower() == "date")
+            {
+                if (order == "asc")
+                {
+                    query = query.OrderBy(p => p.CreatedAt);
+                }
+                else
+                {
+                    query = query.OrderByDescending(p => p.CreatedAt);
+                }
+            }
+            else 
+            {
+                if (order == "asc")
+                {
+                    query = query.OrderBy(p => p.Id);
+                }
+                else
+                {
+                    query = query.OrderByDescending(p => p.Id);
+                }
+            }
 
 
             if (products == null)
