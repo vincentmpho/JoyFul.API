@@ -20,9 +20,39 @@ namespace JoyFul.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllProducts()
+        public IActionResult GetAllProducts(string serach, string category,
+            int minPrice, int maxPrice)
         {
-            var products = _context.Products.ToList();
+            //serch Functionality
+            IQueryable<Product>query = _context.Products;
+
+            if (serach !=null)
+            {
+                query = query.Where(p => p.Name.Contains(serach) || p.Description.Contains(serach));
+            }
+
+            //check if it's null or not
+            if (category != null)
+            {
+                query = query.Where(p=>p.Category==category);
+            }
+
+            if(minPrice != null)
+            {
+                query =query.Where(p=>p.Price<=maxPrice);
+            }
+
+            if(maxPrice != null)
+            {
+                query = query.Where(p=>p.Price<=minPrice);
+            }
+
+            //List of product
+            var products = query.ToList();
+
+            //Add the serch criteria
+
+
             if (products == null)
             {
                 return NotFound();
