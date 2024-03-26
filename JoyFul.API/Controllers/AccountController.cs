@@ -84,6 +84,62 @@ namespace JoyFul.API.Controllers
             return Ok(response);
         }
 
+
+        [HttpPost("Login")]
+        public IActionResult Login(string email, string password)
+        {
+            // Retrieve user from the database based on email
+            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+
+            // If user is not found, return BadRequest with error message
+            if (user == null)
+            {
+                ModelState.AddModelError("Error", "Email or Password not valid");
+                return BadRequest(ModelState);
+            }
+
+            // Verify Password
+            var passwordHasher = new PasswordHasher<User>();
+            var result = passwordHasher.VerifyHashedPassword(new User(), user.Password, password);
+
+            // Check password verification result
+            if (result == PasswordVerificationResult.Failed)
+            {
+                // If password verification failed, return BadRequest with error message
+                ModelState.AddModelError("Password", "Wrong Password");
+                return BadRequest(ModelState);
+            }
+
+            // Create a JWT token for the user
+            var jwt = CreateJWTToken(user);
+
+            // Create a UserProfileDto object containing user details
+            UserProfileDto userProfileDto = new UserProfileDto()
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Phone = user.Phone,
+                Address = user.Address,
+                Role = user.Role,
+                CreatedAt = DateTime.Now,
+            };
+
+            // Create a response object containing JWT token and user profile details
+            var response = new
+            {
+                Token = jwt, // JWT token
+                User = userProfileDto // User profile details
+            };
+
+            // Return HTTP OK response with the response object
+            return Ok(response);
+        }
+
+
+
+
         // Method to create a JWT token for the user
         private string CreateJWTToken(User user)
         {
